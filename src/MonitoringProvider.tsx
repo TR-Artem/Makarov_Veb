@@ -2,8 +2,9 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { MonitoringContext } from './monitoring'
 import type { Run, Site } from './types'
 
-async function loadJson(name: string) {
-  const response = await fetch(`${import.meta.env.BASE_URL}data/${name}`)
+async function loadJson(name: string, fresh = false) {
+  const query = fresh ? `?t=${Date.now()}` : ''
+  const response = await fetch(`${import.meta.env.BASE_URL}data/${name}${query}`)
   if (!response.ok) {
     throw new Error(`Файл ${name} не загрузился: код ${response.status}.`)
   }
@@ -21,7 +22,7 @@ function MonitoringProvider({ children }: { children: ReactNode }) {
     async function load() {
       try {
         const list: Site[] = await loadJson('sites.json')
-        const results: { history: Run[] } = await loadJson('results.json')
+        const results: { history: Run[] } = await loadJson('results.json', true)
         if (!ignore) {
           setSites(list)
           setHistory(results.history)
